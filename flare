@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract SimpleMusicPlayer {
+
+    struct Song {
+        string title;
+        string artist;
+    }
+
+    // mapping instead of array → cheaper
+    mapping(uint256 => Song) public songs;
+    uint256 public songCount;
+
+    uint256 public lastPlayed;
+
+    // only emit song ID to save gas
+    event SongPlayed(uint256 indexed songId);
+
+    constructor() {
+        // No default songs → cheaper deployment
+    }
+
+    function addSong(string calldata title, string calldata artist) public {
+        songs[songCount] = Song(title, artist);
+        songCount++;
+    }
+
+    function getSong(uint256 index) public view returns (string memory, string memory) {
+        require(index < songCount, "Song does not exist");
+        Song memory s = songs[index];
+        return (s.title, s.artist);
+    }
+
+    function playSong(uint256 index) public {
+        require(index < songCount, "Song does not exist");
+        lastPlayed = index;
+        emit SongPlayed(index);
+    }
+}
